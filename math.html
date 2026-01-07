@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chaos Game – Sierpiński Triangle</title>
+    <style>
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #050b1a, #000000);
+            color: #cfe8ff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
+        p {
+            opacity: 0.7;
+        }
+
+        canvas {
+            margin-top: 20px;
+            border: 1px solid #1e2a44;
+            background-color: black;
+            cursor: crosshair;
+        }
+
+        button {
+            margin: 15px 8px;
+            padding: 10px 22px;
+            background: #0a5cff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3a7dff;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Chaos Game</h2>
+<p>Select 3 points and watch the triangle emerge</p>
+
+<canvas id="canvas" width="800" height="800"></canvas><br>
+<button onclick="startChaos()">Start</button>
+<button onclick="resetCanvas()">Reset</button>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+// High-DPI scaling
+const dpr = window.devicePixelRatio || 1;
+const size = 800;
+
+canvas.style.width = size + "px";
+canvas.style.height = size + "px";
+canvas.width = size * dpr;
+canvas.height = size * dpr;
+
+ctx.scale(dpr, dpr);
+
+// Visual settings
+ctx.fillStyle = "#3fa9ff";
+ctx.shadowBlur = 0; // turn OFF blur for crisp pixels
+
+let vertices = [];
+let point;
+let running = false;
+let animationId;
+
+canvas.addEventListener("click", (e) => {
+    if (vertices.length === 3 || running) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    vertices.push({ x, y });
+
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+});
+
+function startChaos() {
+    if (vertices.length !== 3) {
+        alert("Select exactly 3 points");
+        return;
+    }
+
+    running = true;
+    point = {
+        x: Math.random() * size,
+        y: Math.random() * size
+    };
+
+    animate();
+}
+
+function animate() {
+    for (let i = 0; i < 50; i++) {
+        const v = vertices[Math.floor(Math.random() * 3)];
+        point.x = (point.x + v.x) / 2;
+        point.y = (point.y + v.y) / 2;
+
+        ctx.fillRect(point.x, point.y, 0.7, 0.7); // sharper dots
+    }
+
+    animationId = requestAnimationFrame(animate);
+}
+
+function resetCanvas() {
+    cancelAnimationFrame(animationId);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    vertices = [];
+    running = false;
+}
+</script>
+
+</body>
+</html>
